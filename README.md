@@ -1,2 +1,2 @@
-# talkbox-api
-なにかの API
+# talkbox
+なにかの Next.js
