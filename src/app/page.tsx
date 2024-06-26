@@ -1,20 +1,10 @@
 "use client";
 
 import { useState, useEffect, useTransition } from "react";
-import { z } from "zod";
 import { addHaiku, checkWinning } from "../lib/actions";
 import FormComponent from "./FormComponent";
 import DisplayComponent from "./DisplayComponent";
-
-const haikuSchema = z
-  .string()
-  .min(6, { message: "一句は6文字以上25文字以内である必要があります。" })
-  .max(25, { message: "一句は6文字以上25文字以内である必要があります。" });
-
-const haijinNameSchema = z
-  .string()
-  .min(1, { message: "詠み人は1文字以上25文字以内である必要があります。" })
-  .max(25, { message: "詠み人は1文字以上25文字以内である必要があります。" });
+import { Card, CardHeader, CardContent } from "../components/ui/card";
 
 export default function Page() {
   const [haiku, setHaiku] = useState("");
@@ -27,7 +17,7 @@ export default function Page() {
     haijin_name?: string;
   }>({});
   const [message, setMessage] = useState(
-    "自由律・無季で構いません。一句お願いします"
+    "『コミュニケーションのこれまでとこれから』をテーマに一句お願いします"
   );
 
   useEffect(() => {
@@ -55,22 +45,6 @@ export default function Page() {
   }, []);
 
   const handleSubmit = (formData: FormData) => {
-    const haikuValidation = haikuSchema.safeParse(formData.get("haiku"));
-    const haijinNameValidation = haijinNameSchema.safeParse(
-      formData.get("haijin_name")
-    );
-
-    if (!haikuValidation.success || !haijinNameValidation.success) {
-      const newErrors: { haiku?: string; haijin_name?: string } = {};
-      if (!haikuValidation.success)
-        newErrors.haiku = haikuValidation.error.errors[0].message;
-      if (!haijinNameValidation.success)
-        newErrors.haijin_name = haijinNameValidation.error.errors[0].message;
-      setErrors(newErrors);
-      return;
-    }
-
-    setErrors({});
     startTransition(async () => {
       const { talk_id, result, token } = await addHaiku(formData);
       setTalkId(talk_id);
@@ -95,27 +69,34 @@ export default function Page() {
   };
 
   return (
-    <div>
-      <h2>投句箱</h2>
-      <p>{message}</p>
-      {talkId === null ? (
-        <FormComponent
-          haiku={haiku}
-          haijinName={haijinName}
-          setHaiku={setHaiku}
-          setHaijinName={setHaijinName}
-          handleSubmit={handleSubmit}
-          errors={errors}
-          isPending={isPending}
-        />
-      ) : (
-        <DisplayComponent
-          haiku={haiku}
-          haijinName={haijinName}
-          talkId={talkId}
-          handleCheckWinning={handleCheckWinning}
-        />
-      )}
+    <div className="max-w-md mx-auto p-4 min-w-[360px]">
+      <Card>
+        <CardHeader className="text-center text-2xl font-bold text-gray-800">
+          投句箱
+        </CardHeader>
+        <CardContent>
+          <p className="text-center text-gray-600 mb-4">{message}</p>
+          {talkId === null ? (
+            <FormComponent
+              haiku={haiku}
+              haijinName={haijinName}
+              setHaiku={setHaiku}
+              setHaijinName={setHaijinName}
+              handleSubmit={handleSubmit}
+              errors={errors}
+              setErrors={setErrors}
+              isPending={isPending}
+            />
+          ) : (
+            <DisplayComponent
+              haiku={haiku}
+              haijinName={haijinName}
+              talkId={talkId}
+              handleCheckWinning={handleCheckWinning}
+            />
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
