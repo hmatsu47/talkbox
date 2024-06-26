@@ -3,6 +3,11 @@
 import { Pool } from "pg";
 import * as dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
+import {
+  BedrockRuntimeClient,
+  InvokeModelCommand,
+} from "@aws-sdk/client-bedrock-runtime";
+import pgvector from "pgvector/pg";
 
 dotenv.config();
 
@@ -13,6 +18,29 @@ const pool = new Pool({
   password: process.env.DATABASE_PASSWORD,
   port: Number(process.env.DATABASE_PORT),
 });
+
+async function getEmbedding(text: string): Promise<number[] | null> {
+  const client = new BedrockRuntimeClient({ region: "us-west-2" });
+  const command = new InvokeModelCommand({
+    modelId: "amazon.titan-embed-text-v2:0",
+    body: JSON.stringify({
+      inputText: text,
+      dimensions: 1024,
+      normalize: true,
+    }),
+    contentType: "application/json",
+  });
+
+  try {
+    const response = await client.send(command);
+    const responseBody = await response.body.transformToString();
+    const embedding = JSON.parse(responseBody).embedding;
+    return embedding;
+  } catch (error) {
+    console.error("Error fetching embedding:", error);
+    return null;
+  }
+}
 
 async function getLatestSetting() {
   const client = await pool.connect();
@@ -35,11 +63,21 @@ export async function addHaiku(
     return { talk_id: null, result: "投句可能期間は終了しました", token: null };
   }
 
+  const embedding = await getEmbedding(haiku);
+  if (embedding === null) {
+    return {
+      talk_id: null,
+      result: "エラーが発生しました。再試行してください",
+      token: null,
+    };
+  }
+
   try {
     const client = await pool.connect();
+    await pgvector.registerType(client);
     const result = await client.query(
-      "INSERT INTO talk_box (haiku, haijin_name, token, winning) VALUES ($1, $2, $3, $4) RETURNING talk_id, token",
-      [haiku, haijinName, token, null]
+      "INSERT INTO talk_box (haiku, haijin_name, token, winning, embedding) VALUES ($1, $2, $3, $4, $5) RETURNING talk_id, token",
+      [haiku, haijinName, token, null, pgvector.toSql(embedding)]
     );
     client.release();
 
