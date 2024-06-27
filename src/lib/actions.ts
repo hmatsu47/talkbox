@@ -58,6 +58,22 @@ export async function addHaiku(
   const haijinName = formData.get("haijin_name") as string;
   const token = uuidv4();
 
+  if (haiku.length < 6 || haiku.length > 25) {
+    return {
+      talk_id: null,
+      result: "6〜25文字で入力してください",
+      token: null,
+    };
+  }
+
+  if (haijinName.length < 1 || haijinName.length > 25) {
+    return {
+      talk_id: null,
+      result: "1〜25文字で入力してください",
+      token: null,
+    };
+  }
+
   const talkOn = await getLatestSetting();
   if (talkOn === false) {
     return { talk_id: null, result: "投句可能期間は終了しました", token: null };
@@ -102,7 +118,7 @@ export async function checkWinning(
 ): Promise<string> {
   const talkOn = await getLatestSetting();
   if (talkOn === true) {
-    return "まだ審査が行われていません。しばらく待ってからボタンをクリックしてください";
+    return "まだ抽選が行われていません。しばらく待ってからボタンをクリックしてください";
   }
 
   try {
@@ -120,7 +136,7 @@ export async function checkWinning(
     const winning = result.rows[0].winning;
 
     if (winning === null) {
-      return "まだ審査が行われていません。しばらく待ってからボタンをクリックしてください";
+      return "まだ抽選が行われていません。しばらく待ってからボタンをクリックしてください";
     }
 
     return winning;
