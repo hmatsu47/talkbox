@@ -17,7 +17,7 @@ export default function Page() {
     haijin_name?: string;
   }>({});
   const [message, setMessage] = useState(
-    "『コミュニケーションのこれまでとこれから』をテーマに一句お願いします"
+    "「ITコミュニティのこれまでと、これから」で、一句お願いします"
   );
 
   useEffect(() => {
@@ -52,8 +52,11 @@ export default function Page() {
       setToken(token);
       if (talk_id && token) {
         localStorage.setItem("talkId", talk_id.toString());
-        localStorage.setItem("haiku", haiku);
-        localStorage.setItem("haijinName", haijinName);
+        localStorage.setItem("haiku", formData.get("haiku") as string);
+        localStorage.setItem(
+          "haijinName",
+          formData.get("haijin_name") as string
+        );
         localStorage.setItem("token", token);
       }
     });

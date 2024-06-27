@@ -36,7 +36,7 @@ const DisplayComponent: React.FC<DisplayComponentProps> = ({
           <TableCell colSpan={2} className="p-2 text-center">
             <Button
               onClick={handleCheckWinning}
-              className="bg-orange-500 text-white"
+              className="bg-orange-500 text-white hover:bg-orange-300"
             >
               当選結果を確認
             </Button>

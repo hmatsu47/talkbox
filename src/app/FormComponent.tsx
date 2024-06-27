@@ -32,6 +32,16 @@ const FormComponent: React.FC<FormComponentProps> = ({
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
 
+    // Trim whitespace
+    const haikuTrimmed = (formData.get("haiku") as string).trim();
+    const haijinNameTrimmed = (formData.get("haijin_name") as string).trim();
+    formData.set("haiku", haikuTrimmed);
+    formData.set("haijin_name", haijinNameTrimmed);
+    setHaiku(haikuTrimmed);
+    setHaijinName(haijinNameTrimmed);
+    localStorage.setItem("haiku", haikuTrimmed);
+    localStorage.setItem("haijinName", haijinNameTrimmed);
+
     // バリデーションチェック
     const haikuSchema = z
       .string()
@@ -43,10 +53,8 @@ const FormComponent: React.FC<FormComponentProps> = ({
       .min(1, { message: "1〜25文字で入力してください" })
       .max(25, { message: "1〜25文字で入力してください" });
 
-    const haikuValidation = haikuSchema.safeParse(formData.get("haiku"));
-    const haijinNameValidation = haijinNameSchema.safeParse(
-      formData.get("haijin_name")
-    );
+    const haikuValidation = haikuSchema.safeParse(haikuTrimmed);
+    const haijinNameValidation = haijinNameSchema.safeParse(haijinNameTrimmed);
 
     if (!haikuValidation.success || !haijinNameValidation.success) {
       const newErrors: { haiku?: string; haijin_name?: string } = {};
@@ -137,7 +145,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-orange-500 text-white"
+                className="bg-orange-500 text-white hover:bg-orange-300"
               >
                 投句
               </Button>
