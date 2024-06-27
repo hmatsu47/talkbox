@@ -19,6 +19,8 @@ const pool = new Pool({
   port: Number(process.env.DATABASE_PORT),
 });
 
+const GOODS_COUNT = Number(process.env.GOODS_COUNT);
+
 async function getEmbedding(text: string): Promise<number[] | null> {
   const client = new BedrockRuntimeClient({ region: "us-west-2" });
   const command = new InvokeModelCommand({
@@ -54,8 +56,8 @@ async function getLatestSetting() {
 export async function addHaiku(
   formData: FormData
 ): Promise<{ talk_id: number | null; result: string; token: string | null }> {
-  const haiku = formData.get("haiku") as string;
-  const haijinName = formData.get("haijin_name") as string;
+  const haiku = (formData.get("haiku") as string).trim();
+  const haijinName = (formData.get("haijin_name") as string).trim();
   const token = uuidv4();
 
   if (haiku.length < 6 || haiku.length > 25) {
@@ -92,14 +94,29 @@ export async function addHaiku(
     const client = await pool.connect();
     await pgvector.registerType(client);
     const result = await client.query(
-      "INSERT INTO talk_box (haiku, haijin_name, token, winning, embedding) VALUES ($1, $2, $3, $4, $5) RETURNING talk_id, token",
-      [haiku, haijinName, token, null, pgvector.toSql(embedding)]
+      "INSERT INTO talk_box (haiku, haijin_name, token, winning, embedding, hand_over) VALUES ($1, $2, $3, $4, $5, $6) RETURNING talk_id, token",
+      [haiku, haijinName, token, null, pgvector.toSql(embedding), 0]
     );
+
+    const sumResult = await client.query(
+      "SELECT SUM(hand_over) AS total_hand_over FROM talk_box"
+    );
+
+    const totalHandOver = sumResult.rows[0].total_hand_over;
+
+    let responseMessage;
+    if (totalHandOver >= GOODS_COUNT) {
+      responseMessage =
+        "投句ありがとうございます！17時台後半のLTで当選発表するのでお待ちください";
+    } else {
+      responseMessage = `投句ありがとうございます！先着${GOODS_COUNT}名様にプレゼントがあります！休憩時間中お早めに受付までお越しください（別途抽選もあります）`;
+    }
+
     client.release();
 
     return {
       talk_id: result.rows[0].talk_id,
-      result: "投句いただきました。ありがとうございます！",
+      result: responseMessage,
       token: result.rows[0].token,
     };
   } catch (error) {
