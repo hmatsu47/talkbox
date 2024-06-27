@@ -135,7 +135,7 @@ export async function checkWinning(
 ): Promise<string> {
   const talkOn = await getLatestSetting();
   if (talkOn === true) {
-    return "まだ抽選が行われていません。しばらく待ってからボタンをクリックしてください";
+    return "まだ抽選が行われていません。当選発表後にクリックしてください";
   }
 
   try {
@@ -153,7 +153,7 @@ export async function checkWinning(
     const winning = result.rows[0].winning;
 
     if (winning === null) {
-      return "まだ抽選が行われていません。しばらく待ってからボタンをクリックしてください";
+      return "まだ抽選が行われていません。当選発表後にクリックしてください";
     }
 
     return winning;
