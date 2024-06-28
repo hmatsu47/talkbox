@@ -55,7 +55,7 @@ async function getLatestSetting() {
 
 export async function addHaiku(
   formData: FormData
-): Promise<{ talk_id: number | null; result: string; token: string | null }> {
+): Promise<{ talk_id: number | null; result: string[]; token: string | null }> {
   const haiku = (formData.get("haiku") as string).trim();
   const haijinName = (formData.get("haijin_name") as string).trim();
   const token = uuidv4();
@@ -63,7 +63,7 @@ export async function addHaiku(
   if (haiku.length < 6 || haiku.length > 25) {
     return {
       talk_id: null,
-      result: "6〜25文字で入力してください",
+      result: ["6〜25文字で入力してください"],
       token: null,
     };
   }
@@ -71,21 +71,25 @@ export async function addHaiku(
   if (haijinName.length < 1 || haijinName.length > 25) {
     return {
       talk_id: null,
-      result: "1〜25文字で入力してください",
+      result: ["1〜25文字で入力してください"],
       token: null,
     };
   }
 
   const talkOn = await getLatestSetting();
   if (talkOn === false) {
-    return { talk_id: null, result: "投句可能期間は終了しました", token: null };
+    return {
+      talk_id: null,
+      result: ["投句可能期間は終了しました"],
+      token: null,
+    };
   }
 
   const embedding = await getEmbedding(haiku);
   if (embedding === null) {
     return {
       talk_id: null,
-      result: "エラーが発生しました。再試行してください",
+      result: ["エラーが発生しました", "再試行してください"],
       token: null,
     };
   }
@@ -104,12 +108,20 @@ export async function addHaiku(
 
     const totalHandOver = sumResult.rows[0].total_hand_over;
 
-    let responseMessage;
+    let responseMessage: string[];
     if (totalHandOver >= GOODS_COUNT) {
-      responseMessage =
-        "投句ありがとうございます！17時台後半のLTで当選発表するのでお待ちください";
+      responseMessage = [
+        "投句ありがとうございます！",
+        "当選発表をお待ちください！",
+        "（17時台後半）",
+      ];
     } else {
-      responseMessage = `投句ありがとうございます！先着${GOODS_COUNT}名様にプレゼントがあります！休憩時間中お早めに受付までお越しください（別途抽選もあります）`;
+      responseMessage = [
+        "投句ありがとうございます！",
+        `先着${GOODS_COUNT}名様にプレゼントがあります！`,
+        "休憩時間中お早めに受付まで",
+        "（17:00締切／別途抽選あり）",
+      ];
     }
 
     client.release();
@@ -120,10 +132,18 @@ export async function addHaiku(
       token: result.rows[0].token,
     };
   } catch (error) {
+    if ((error as any).code === "23505") {
+      // Unique violation
+      return {
+        talk_id: null,
+        result: ["エラーが発生しました", "同一の句は投句できません"],
+        token: null,
+      };
+    }
     console.error("Error inserting haiku:", error);
     return {
       talk_id: null,
-      result: "エラーが発生しました。投句できませんでした…",
+      result: ["エラーが発生しました", "投句できませんでした…"],
       token: null,
     };
   }
@@ -132,10 +152,14 @@ export async function addHaiku(
 export async function checkWinning(
   talkId: number,
   token: string
-): Promise<string> {
+): Promise<string[]> {
   const talkOn = await getLatestSetting();
   if (talkOn === true) {
-    return "まだ抽選が行われていません。当選発表後にクリックしてください";
+    return [
+      "まだ抽選が行われていません",
+      "当選発表をお待ちください！",
+      "（17時台後半）",
+    ];
   }
 
   try {
@@ -147,18 +171,22 @@ export async function checkWinning(
     client.release();
 
     if (result.rowCount !== 1) {
-      return "エラーが発生しました。再試行してください";
+      return ["エラーが発生しました", "再試行してください"];
     }
 
     const winning = result.rows[0].winning;
 
     if (winning === null) {
-      return "まだ抽選が行われていません。当選発表後にクリックしてください";
+      return [
+        "まだ抽選が行われていません",
+        "当選発表をお待ちください！",
+        "（17時台後半）",
+      ];
     }
 
-    return winning;
+    return [winning];
   } catch (error) {
     console.error("Error checking winning status:", error);
-    return "エラーが発生しました。再試行してください";
+    return ["エラーが発生しました", "再試行してください"];
   }
 }

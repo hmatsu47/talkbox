@@ -16,9 +16,11 @@ export default function Page() {
     haiku?: string;
     haijin_name?: string;
   }>({});
-  const [message, setMessage] = useState(
-    "「ITコミュニティのこれまでと、これから」で、一句お願いします"
-  );
+  const [message, setMessage] = useState<string[]>([
+    "「ITコミュニティのこれまでと、これから」",
+    "をテーマに一句お願いします",
+    "（17:00締切）",
+  ]);
 
   useEffect(() => {
     const storedTalkId = localStorage.getItem("talkId");
@@ -28,7 +30,11 @@ export default function Page() {
 
     if (storedTalkId) {
       setTalkId(Number(storedTalkId));
-      setMessage("投句いただきました。ありがとうございます！");
+      setMessage([
+        "投句ありがとうございます！",
+        "当選発表をお待ちください！",
+        "（17時台後半）",
+      ]);
     }
 
     if (storedHaiku) {
@@ -67,7 +73,7 @@ export default function Page() {
       const result = await checkWinning(talkId, token);
       setMessage(result);
     } else {
-      setMessage("エラーが発生しました。再試行してください");
+      setMessage(["エラーが発生しました", "再試行してください"]);
     }
   };
 
@@ -78,7 +84,14 @@ export default function Page() {
           投句箱
         </CardHeader>
         <CardContent>
-          <p className="text-center text-gray-600 mb-4">{message}</p>
+          <p className="text-center text-gray-600 mb-4">
+            {message.map((line, index) => (
+              <span key={index}>
+                {line}
+                {index < message.length - 1 && <br />}
+              </span>
+            ))}
+          </p>
           {talkId === null ? (
             <FormComponent
               haiku={haiku}
