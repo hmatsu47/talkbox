@@ -13,24 +13,27 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import { Button } from "../../components/ui/button";
 import { toggleTalkOn, performDraw } from "../../lib/actions";
 
+interface Haiku {
+  talk_id: number;
+  haijin_name: string;
+  haiku: string;
+  hand_over: number;
+  winning: string | null;
+}
+
 export default function ListClient({
   haikus,
   setting,
   isAdminToken,
 }: {
-  haikus: {
-    talk_id: number;
-    haijin_name: string;
-    haiku: string;
-    hand_over: number;
-    winning: string | null;
-  }[];
+  haikus: Haiku[];
   setting: { talk_on: boolean; win_fin: boolean };
   isAdminToken: string;
 }) {
   const [filter, setFilter] = useState<string>("all");
   const [talkOn, setTalkOn] = useState<boolean>(setting.talk_on);
   const [winFin, setWinFin] = useState<boolean>(setting.win_fin);
+  const [filteredHaikus, setFilteredHaikus] = useState<Haiku[]>(haikus);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,6 +45,20 @@ export default function ListClient({
       setIsLoading(false);
     }
   }, [isAdminToken, router]);
+
+  useEffect(() => {
+    const filtered = haikus.filter((haiku) => {
+      if (filter === "unhanded") {
+        return haiku.hand_over === 0;
+      } else if (filter === "handed") {
+        return haiku.hand_over > 0;
+      } else if (filter === "winning") {
+        return haiku.winning && haiku.winning.startsWith("当選");
+      }
+      return true; // 'all' or any other value
+    });
+    setFilteredHaikus(filtered);
+  }, [filter, haikus]);
 
   const handleToggleTalkOn = async () => {
     const newTalkOn = await toggleTalkOn();
@@ -55,17 +72,6 @@ export default function ListClient({
     router.refresh(); // キャッシュフラッシュ
   };
 
-  const filteredHaikus = haikus.filter((haiku) => {
-    if (filter === "unhanded") {
-      return haiku.hand_over === 0;
-    } else if (filter === "handed") {
-      return haiku.hand_over > 0;
-    } else if (filter === "winning") {
-      return haiku.winning && haiku.winning.startsWith("当選");
-    }
-    return true; // 'all' or any other value
-  });
-
   return (
     <div className="max-w-4xl mx-auto p-4 min-w-[360px]">
       <Suspense fallback={<LoadingSpinner />}>
@@ -76,7 +82,6 @@ export default function ListClient({
             <div className="flex justify-start mb-4 space-x-2">
               <Button
                 onClick={handleToggleTalkOn}
-                disabled={winFin}
                 className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
               >
                 {talkOn ? "投句終了" : "投句再開"}
@@ -108,16 +113,32 @@ export default function ListClient({
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="all">
-                <HaikuTable haikus={filteredHaikus} />
+                <HaikuTable
+                  haikus={filteredHaikus}
+                  setHaikus={setFilteredHaikus}
+                  router={router}
+                />
               </TabsContent>
               <TabsContent value="unhanded">
-                <HaikuTable haikus={filteredHaikus} />
+                <HaikuTable
+                  haikus={filteredHaikus}
+                  setHaikus={setFilteredHaikus}
+                  router={router}
+                />
               </TabsContent>
               <TabsContent value="handed">
-                <HaikuTable haikus={filteredHaikus} />
+                <HaikuTable
+                  haikus={filteredHaikus}
+                  setHaikus={setFilteredHaikus}
+                  router={router}
+                />
               </TabsContent>
               <TabsContent value="winning">
-                <HaikuTable haikus={filteredHaikus} />
+                <HaikuTable
+                  haikus={filteredHaikus}
+                  setHaikus={setFilteredHaikus}
+                  router={router}
+                />
               </TabsContent>
             </Tabs>
           </>

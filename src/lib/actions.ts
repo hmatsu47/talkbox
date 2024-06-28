@@ -156,8 +156,9 @@ export async function checkWinning(
 ): Promise<string[]> {
   const latestSetting = await getLatestSetting();
   const winFin = latestSetting.win_fin;
+  const talkOn = latestSetting.talk_on;
 
-  if (winFin === false) {
+  if (winFin === false || talkOn === true) {
     return [
       "まだ抽選が行われていません",
       "当選発表をお待ちください！",
@@ -241,5 +242,20 @@ export async function performDraw() {
   } catch (error) {
     console.error("Error performing draw:", error);
     return "エラーが発生しました。再試行してください。";
+  }
+}
+
+export async function toggleHandOver(talkId: number): Promise<number | null> {
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      "UPDATE talk_box SET hand_over = CASE WHEN hand_over = 0 THEN 1 ELSE 0 END WHERE talk_id = $1 RETURNING hand_over",
+      [talkId]
+    );
+    client.release();
+    return result.rows[0].hand_over;
+  } catch (error) {
+    console.error("Error toggling hand_over status:", error);
+    return null;
   }
 }
