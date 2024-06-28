@@ -78,13 +78,13 @@ export default function Page() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-4 min-w-[360px]">
+    <div className="max-w-4xl mx-auto p-4 min-w-[360px]">
       <Card>
-        <CardHeader className="text-center text-2xl font-bold text-gray-800">
+        <CardHeader className="text-center text-2xl font-bold text-gray-800 text-xs-responsive">
           投句箱
         </CardHeader>
         <CardContent>
-          <p className="text-center text-gray-600 mb-4">
+          <p className="text-center text-gray-600 mb-4 text-xs-responsive">
             {message.map((line, index) => (
               <span key={index}>
                 {line}

@@ -18,25 +18,25 @@ const DisplayComponent: React.FC<DisplayComponentProps> = ({
   handleCheckWinning,
 }) => {
   return (
-    <Table className="w-full text-left border-collapse">
+    <Table className="w-full text-left border-collapse text-xs-responsive">
       <TableBody>
         <TableRow>
-          <TableCell className="p-2 border-b">一句:</TableCell>
-          <TableCell className="p-2 border-b">{haiku}</TableCell>
+          <TableCell className="py-2 px-4 border-b">一句:</TableCell>
+          <TableCell className="py-2 px-4 border-b">{haiku}</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell className="p-2 border-b">詠み人:</TableCell>
-          <TableCell className="p-2 border-b">{haijinName}</TableCell>
+          <TableCell className="py-2 px-4 border-b">詠み人:</TableCell>
+          <TableCell className="py-2 px-4 border-b">{haijinName}</TableCell>
         </TableRow>
         <TableRow>
-          <TableCell className="p-2 border-b">投句番号:</TableCell>
-          <TableCell className="p-2 border-b">{talkId}</TableCell>
+          <TableCell className="py-2 px-4 border-b">投句番号:</TableCell>
+          <TableCell className="py-2 px-4 border-b">{talkId}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell colSpan={2} className="p-2 text-center">
             <Button
               onClick={handleCheckWinning}
-              className="bg-orange-500 text-white hover:bg-orange-300"
+              className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
             >
               当選結果を確認
             </Button>

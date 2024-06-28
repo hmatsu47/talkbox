@@ -74,7 +74,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
 
   return (
     <form onSubmit={onSubmit}>
-      <Table className="w-full text-left border-collapse">
+      <Table className="w-full text-left border-collapse text-xs-responsive">
         <TableBody>
           <TableRow className="p-2 border-none">
             <TableCell className="p-2 border-none">
@@ -145,7 +145,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-orange-500 text-white hover:bg-orange-300"
+                className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
               >
                 投句
               </Button>

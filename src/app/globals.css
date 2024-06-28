@@ -76,3 +76,9 @@
     @apply bg-background text-foreground;
   }
 } */
+
+@media (max-width: 450px) {
+  .text-xs-responsive {
+    font-size: 0.875rem;
+  }
+}
