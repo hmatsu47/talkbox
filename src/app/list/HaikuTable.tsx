@@ -15,7 +15,7 @@ export function HaikuTable({
     <table className="min-w-full bg-white border border-gray-300 text-xs-responsive">
       <thead>
         <tr>
-          <th className="py-2 px-4 border-b text-right">投句番号</th>
+          <th className="py-2 px-4 border-b text-right">番号</th>
           <th className="py-2 px-4 border-b">詠み人・句</th>
         </tr>
       </thead>

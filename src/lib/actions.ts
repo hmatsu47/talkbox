@@ -19,8 +19,6 @@ const pool = new Pool({
   port: Number(process.env.DATABASE_PORT),
 });
 
-const GOODS_COUNT = Number(process.env.GOODS_COUNT);
-
 async function getEmbedding(text: string): Promise<number[] | null> {
   const client = new BedrockRuntimeClient({ region: "us-west-2" });
   const command = new InvokeModelCommand({
@@ -60,6 +58,15 @@ export async function addHaiku(
   const haijinName = (formData.get("haijin_name") as string).trim();
   const token = uuidv4();
 
+  const talkOn = await getLatestSetting();
+  if (talkOn === false) {
+    return {
+      talk_id: null,
+      result: ["投句可能期間は終了しました"],
+      token: null,
+    };
+  }
+
   if (haiku.length < 6 || haiku.length > 25) {
     return {
       talk_id: null,
@@ -72,15 +79,6 @@ export async function addHaiku(
     return {
       talk_id: null,
       result: ["1〜25文字で入力してください"],
-      token: null,
-    };
-  }
-
-  const talkOn = await getLatestSetting();
-  if (talkOn === false) {
-    return {
-      talk_id: null,
-      result: ["投句可能期間は終了しました"],
       token: null,
     };
   }
@@ -102,38 +100,39 @@ export async function addHaiku(
       [haiku, haijinName, token, null, pgvector.toSql(embedding), 0]
     );
 
-    const sumResult = await client.query(
-      "SELECT SUM(hand_over) AS total_hand_over FROM talk_box"
+    const goodsCount = Number(process.env.GOODS_COUNT || 0);
+    const sumHandOverResult = await client.query(
+      "SELECT SUM(hand_over) as sum_hand_over FROM talk_box"
     );
-
-    const totalHandOver = sumResult.rows[0].total_hand_over;
-
-    let responseMessage: string[];
-    if (totalHandOver >= GOODS_COUNT) {
-      responseMessage = [
-        "投句ありがとうございます！",
-        "当選発表をお待ちください！",
-        "（17時台後半）",
-      ];
-    } else {
-      responseMessage = [
-        "投句ありがとうございます！",
-        `先着${GOODS_COUNT}名様にプレゼントがあります！`,
-        "休憩時間中お早めに受付まで",
-        "（17:00締切／別途抽選あり）",
-      ];
-    }
+    const sumHandOver = sumHandOverResult.rows[0].sum_hand_over || 0;
 
     client.release();
 
-    return {
-      talk_id: result.rows[0].talk_id,
-      result: responseMessage,
-      token: result.rows[0].token,
-    };
-  } catch (error) {
-    if ((error as any).code === "23505") {
-      // Unique violation
+    if (sumHandOver >= goodsCount) {
+      return {
+        talk_id: result.rows[0].talk_id,
+        result: [
+          "投句ありがとうございます！",
+          "当選発表をお待ちください！",
+          "（17時台後半）",
+        ],
+        token: result.rows[0].token,
+      };
+    } else {
+      return {
+        talk_id: result.rows[0].talk_id,
+        result: [
+          "投句ありがとうございます！",
+          `先着${goodsCount}名様にプレゼントがあります！`,
+          "休憩時間中お早めに受付まで",
+          "※この画面を見せてください",
+          "（17:00締切／別途抽選あり）",
+        ],
+        token: result.rows[0].token,
+      };
+    }
+  } catch (error: any) {
+    if (error.code === "23505") {
       return {
         talk_id: null,
         result: ["エラーが発生しました", "同一の句は投句できません"],
