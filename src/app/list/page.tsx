@@ -2,8 +2,8 @@ import { Pool } from "pg";
 import * as dotenv from "dotenv";
 import { Card, CardHeader, CardContent } from "../../components/ui/card";
 import ListClient from "./ListClient";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { Suspense } from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
 
 dotenv.config();
 
@@ -24,8 +24,18 @@ async function getAllHaikus() {
   return result.rows;
 }
 
+async function getLatestSetting() {
+  const client = await pool.connect();
+  const query =
+    "SELECT talk_on, win_fin FROM setting ORDER BY setting_id DESC LIMIT 1";
+  const result = await client.query(query);
+  client.release();
+  return result.rows[0];
+}
+
 export default async function ListPage() {
   const haikus = await getAllHaikus();
+  const setting = await getLatestSetting();
   const isAdminToken = process.env.IS_ADMIN_TOKEN ?? "";
 
   return (
@@ -36,7 +46,11 @@ export default async function ListPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Suspense fallback={<LoadingSpinner />}>
-            <ListClient haikus={haikus} isAdminToken={isAdminToken} />
+            <ListClient
+              haikus={haikus}
+              setting={setting}
+              isAdminToken={isAdminToken}
+            />
           </Suspense>
         </CardContent>
       </Card>

@@ -45,10 +45,10 @@ async function getEmbedding(text: string): Promise<number[] | null> {
 async function getLatestSetting() {
   const client = await pool.connect();
   const result = await client.query(
-    "SELECT talk_on FROM setting ORDER BY setting_id DESC LIMIT 1"
+    "SELECT talk_on, win_fin FROM setting ORDER BY setting_id DESC LIMIT 1"
   );
   client.release();
-  return result.rows[0]?.talk_on;
+  return result.rows[0];
 }
 
 export async function addHaiku(
@@ -58,7 +58,9 @@ export async function addHaiku(
   const haijinName = (formData.get("haijin_name") as string).trim();
   const token = uuidv4();
 
-  const talkOn = await getLatestSetting();
+  const latestSetting = await getLatestSetting();
+  const talkOn = latestSetting.talk_on;
+
   if (talkOn === false) {
     return {
       talk_id: null,
@@ -152,8 +154,10 @@ export async function checkWinning(
   talkId: number,
   token: string
 ): Promise<string[]> {
-  const talkOn = await getLatestSetting();
-  if (talkOn === true) {
+  const latestSetting = await getLatestSetting();
+  const winFin = latestSetting.win_fin;
+
+  if (winFin === false) {
     return [
       "まだ抽選が行われていません",
       "当選発表をお待ちください！",
@@ -176,16 +180,66 @@ export async function checkWinning(
     const winning = result.rows[0].winning;
 
     if (winning === null) {
-      return [
-        "まだ抽選が行われていません",
-        "当選発表をお待ちください！",
-        "（17時台後半）",
-      ];
+      return ["残念、はずれです"];
     }
 
     return [winning];
   } catch (error) {
     console.error("Error checking winning status:", error);
     return ["エラーが発生しました", "再試行してください"];
+  }
+}
+
+export async function toggleTalkOn() {
+  const latestSetting = await getLatestSetting();
+  const newTalkOn = !latestSetting.talk_on;
+
+  const client = await pool.connect();
+  await client.query(
+    "UPDATE setting SET talk_on = $1 WHERE setting_id = (SELECT MAX(setting_id) FROM setting)",
+    [newTalkOn]
+  );
+  client.release();
+
+  return newTalkOn;
+}
+
+export async function performDraw() {
+  const latestSetting = await getLatestSetting();
+  if (latestSetting.talk_on === true) {
+    return "抽選は投句終了後に行ってください。";
+  }
+
+  const baseAnswer = process.env.BASE_ANSWER || "";
+  const winCount = Number(process.env.WIN_COUNT || 0);
+
+  const baseEmbedding = await getEmbedding(baseAnswer);
+  if (baseEmbedding === null) {
+    return "エラーが発生しました。再試行してください。";
+  }
+
+  try {
+    const client = await pool.connect();
+    await pgvector.registerType(client);
+
+    // 最初に winning が null でない行を null に更新
+    await client.query(
+      "UPDATE talk_box SET winning = null WHERE winning IS NOT NULL"
+    );
+
+    await client.query(
+      "UPDATE talk_box SET winning = '当選しました！おめでとうございます' WHERE talk_id IN (SELECT talk_id FROM talk_box ORDER BY (embedding <#> $1) * -1 DESC LIMIT $2)",
+      [pgvector.toSql(baseEmbedding), winCount]
+    );
+
+    await client.query(
+      "UPDATE setting SET win_fin = true WHERE setting_id = (SELECT MAX(setting_id) FROM setting)"
+    );
+
+    client.release();
+    return "抽選が完了しました。";
+  } catch (error) {
+    console.error("Error performing draw:", error);
+    return "エラーが発生しました。再試行してください。";
   }
 }

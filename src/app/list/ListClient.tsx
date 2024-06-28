@@ -10,9 +10,12 @@ import {
 } from "../../components/ui/tabs";
 import { HaikuTable } from "./HaikuTable";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import { Button } from "../../components/ui/button";
+import { toggleTalkOn, performDraw } from "../../lib/actions";
 
 export default function ListClient({
   haikus,
+  setting,
   isAdminToken,
 }: {
   haikus: {
@@ -22,9 +25,12 @@ export default function ListClient({
     hand_over: number;
     winning: string | null;
   }[];
+  setting: { talk_on: boolean; win_fin: boolean };
   isAdminToken: string;
 }) {
   const [filter, setFilter] = useState<string>("all");
+  const [talkOn, setTalkOn] = useState<boolean>(setting.talk_on);
+  const [winFin, setWinFin] = useState<boolean>(setting.win_fin);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,6 +42,18 @@ export default function ListClient({
       setIsLoading(false);
     }
   }, [isAdminToken, router]);
+
+  const handleToggleTalkOn = async () => {
+    const newTalkOn = await toggleTalkOn();
+    setTalkOn(newTalkOn);
+  };
+
+  const handlePerformDraw = async () => {
+    const message = await performDraw();
+    alert(message);
+    setWinFin(true);
+    router.refresh(); // キャッシュフラッシュ
+  };
 
   const filteredHaikus = haikus.filter((haiku) => {
     if (filter === "unhanded") {
@@ -54,37 +72,55 @@ export default function ListClient({
         {isLoading ? (
           <LoadingSpinner />
         ) : (
-          <Tabs
-            defaultValue={filter}
-            onValueChange={(value) => setFilter(value)}
-          >
-            <TabsList className="mb-4">
-              <TabsTrigger value="all" className="text-xs-responsive">
-                全て
-              </TabsTrigger>
-              <TabsTrigger value="unhanded" className="text-xs-responsive">
-                未渡
-              </TabsTrigger>
-              <TabsTrigger value="handed" className="text-xs-responsive">
-                渡済
-              </TabsTrigger>
-              <TabsTrigger value="winning" className="text-xs-responsive">
-                当選
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="all">
-              <HaikuTable haikus={filteredHaikus} />
-            </TabsContent>
-            <TabsContent value="unhanded">
-              <HaikuTable haikus={filteredHaikus} />
-            </TabsContent>
-            <TabsContent value="handed">
-              <HaikuTable haikus={filteredHaikus} />
-            </TabsContent>
-            <TabsContent value="winning">
-              <HaikuTable haikus={filteredHaikus} />
-            </TabsContent>
-          </Tabs>
+          <>
+            <div className="flex justify-start mb-4 space-x-2">
+              <Button
+                onClick={handleToggleTalkOn}
+                disabled={winFin}
+                className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
+              >
+                {talkOn ? "投句終了" : "投句再開"}
+              </Button>
+              <Button
+                onClick={handlePerformDraw}
+                disabled={talkOn}
+                className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
+              >
+                {winFin ? "再抽選" : "抽選"}
+              </Button>
+            </div>
+            <Tabs
+              defaultValue={filter}
+              onValueChange={(value) => setFilter(value)}
+            >
+              <TabsList className="mb-4">
+                <TabsTrigger value="all" className="text-xs-responsive">
+                  全て
+                </TabsTrigger>
+                <TabsTrigger value="unhanded" className="text-xs-responsive">
+                  未渡
+                </TabsTrigger>
+                <TabsTrigger value="handed" className="text-xs-responsive">
+                  渡済
+                </TabsTrigger>
+                <TabsTrigger value="winning" className="text-xs-responsive">
+                  当選
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="all">
+                <HaikuTable haikus={filteredHaikus} />
+              </TabsContent>
+              <TabsContent value="unhanded">
+                <HaikuTable haikus={filteredHaikus} />
+              </TabsContent>
+              <TabsContent value="handed">
+                <HaikuTable haikus={filteredHaikus} />
+              </TabsContent>
+              <TabsContent value="winning">
+                <HaikuTable haikus={filteredHaikus} />
+              </TabsContent>
+            </Tabs>
+          </>
         )}
       </Suspense>
     </div>
