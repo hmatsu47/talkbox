@@ -2,6 +2,8 @@ import { Pool } from "pg";
 import * as dotenv from "dotenv";
 import { Card, CardHeader, CardContent } from "../../components/ui/card";
 import ListClient from "./ListClient";
+import { Suspense } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 dotenv.config();
 
@@ -33,7 +35,9 @@ export default async function ListPage() {
           投句一覧
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          <ListClient haikus={haikus} isAdminToken={isAdminToken} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <ListClient haikus={haikus} isAdminToken={isAdminToken} />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

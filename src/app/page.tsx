@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, Suspense } from "react";
+import { useRouter } from "next/navigation";
 import { addHaiku, checkWinning } from "../lib/actions";
 import FormComponent from "./FormComponent";
 import DisplayComponent from "./DisplayComponent";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { Card, CardHeader, CardContent } from "../components/ui/card";
 
 export default function Page() {
@@ -21,6 +23,7 @@ export default function Page() {
     "をテーマに一句お願いします",
     "（17:00締切）",
   ]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedTalkId = localStorage.getItem("talkId");
@@ -48,6 +51,8 @@ export default function Page() {
     if (storedToken) {
       setToken(storedToken);
     }
+
+    setIsLoading(false);
   }, []);
 
   const handleSubmit = (formData: FormData) => {
@@ -84,33 +89,41 @@ export default function Page() {
           投句箱
         </CardHeader>
         <CardContent>
-          <p className="text-center text-gray-600 mb-4 text-xs-responsive">
-            {message.map((line, index) => (
-              <span key={index}>
-                {line}
-                {index < message.length - 1 && <br />}
-              </span>
-            ))}
-          </p>
-          {talkId === null ? (
-            <FormComponent
-              haiku={haiku}
-              haijinName={haijinName}
-              setHaiku={setHaiku}
-              setHaijinName={setHaijinName}
-              handleSubmit={handleSubmit}
-              errors={errors}
-              setErrors={setErrors}
-              isPending={isPending}
-            />
-          ) : (
-            <DisplayComponent
-              haiku={haiku}
-              haijinName={haijinName}
-              talkId={talkId}
-              handleCheckWinning={handleCheckWinning}
-            />
-          )}
+          <Suspense fallback={<LoadingSpinner />}>
+            {isLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <>
+                <p className="text-center text-gray-600 mb-4 text-xs-responsive">
+                  {message.map((line, index) => (
+                    <span key={index}>
+                      {line}
+                      {index < message.length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
+                {talkId === null ? (
+                  <FormComponent
+                    haiku={haiku}
+                    haijinName={haijinName}
+                    setHaiku={setHaiku}
+                    setHaijinName={setHaijinName}
+                    handleSubmit={handleSubmit}
+                    errors={errors}
+                    setErrors={setErrors}
+                    isPending={isPending}
+                  />
+                ) : (
+                  <DisplayComponent
+                    haiku={haiku}
+                    haijinName={haijinName}
+                    talkId={talkId}
+                    handleCheckWinning={handleCheckWinning}
+                  />
+                )}
+              </>
+            )}
+          </Suspense>
         </CardContent>
       </Card>
     </div>
