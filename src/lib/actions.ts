@@ -115,8 +115,11 @@ export async function addHaiku(
         talk_id: result.rows[0].talk_id,
         result: [
           "投句ありがとうございます！",
-          "当選発表をお待ちください！",
-          "（17時台後半LTにて）",
+          "",
+          "AI(?)審査による入選作発表があります！",
+          "（17時台後半のLT内で発表予定）",
+          "",
+          "X（旧Twitter）へのポストもぜひ！",
         ],
         token: result.rows[0].token,
       };
@@ -125,10 +128,19 @@ export async function addHaiku(
         talk_id: result.rows[0].talk_id,
         result: [
           "投句ありがとうございます！",
-          `先着${goodsCount}名様にプレゼントがあります！`,
-          "休憩時間中お早めに受付まで！",
-          "※この画面を見せてください",
-          "（17:00締切／LTで別途抽選あり）",
+          "",
+          `当日参加の方、先着${goodsCount}名様に`,
+          "プレゼントがあります！",
+          "",
+          "会場でhmatsu47(まつ)を見つけて、",
+          "この画面をお見せください！",
+          "",
+          "午後の休憩時間は受付付近にいます！",
+          "",
+          "AI(?)審査による入選作発表もあります！",
+          "（17時台後半のLT内で発表予定）",
+          "",
+          "X（旧Twitter）へのポストもぜひ！",
         ],
         token: result.rows[0].token,
       };
@@ -160,16 +172,16 @@ export async function checkWinning(
 
   if (winFin === false || talkOn === true) {
     return [
-      "まだ抽選が行われていません",
-      "当選発表をお待ちください！",
-      "（17時台後半LTにて）",
+      "まだ審査が行われていません",
+      "発表をお待ちください！",
+      "（17時台後半のLT内で発表予定）",
     ];
   }
 
   try {
     const client = await pool.connect();
     const result = await client.query(
-      "SELECT winning FROM talk_box WHERE talk_id = $1 AND token = $2",
+      "SELECT hand_over, winning FROM talk_box WHERE talk_id = $1 AND token = $2",
       [talkId, token]
     );
     client.release();
@@ -181,7 +193,7 @@ export async function checkWinning(
     const winning = result.rows[0].winning;
 
     if (winning === null) {
-      return ["残念、はずれです"];
+      return ["入選ならず…残念！"];
     }
 
     return [winning];
@@ -208,7 +220,7 @@ export async function toggleTalkOn() {
 export async function performDraw() {
   const latestSetting = await getLatestSetting();
   if (latestSetting.talk_on === true) {
-    return "抽選は投句終了後に行ってください。";
+    return "審査は投句終了後に行ってください。";
   }
 
   const baseAnswer = process.env.BASE_ANSWER || "";
@@ -229,7 +241,7 @@ export async function performDraw() {
     );
 
     await client.query(
-      "UPDATE talk_box SET winning = '当選しました！おめでとうございます' WHERE talk_id IN (SELECT talk_id FROM talk_box ORDER BY (embedding <#> $1) * -1 DESC LIMIT $2)",
+      "UPDATE talk_box SET winning = '入選しました！おめでとうございます！' WHERE talk_id IN (SELECT talk_id FROM talk_box ORDER BY (embedding <#> $1) * -1 DESC LIMIT $2)",
       [pgvector.toSql(baseEmbedding), winCount]
     );
 
@@ -238,7 +250,7 @@ export async function performDraw() {
     );
 
     client.release();
-    return "抽選が完了しました。";
+    return "審査が完了しました。";
   } catch (error) {
     console.error("Error performing draw:", error);
     return "エラーが発生しました。再試行してください。";

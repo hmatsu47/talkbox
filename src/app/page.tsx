@@ -19,8 +19,8 @@ export default function Page() {
   }>({});
   const [message, setMessage] = useState<string[]>([
     "「ITコミュニティのこれまでと、これから」",
-    "をテーマに一句お願いします",
-    "（17:00締切）",
+    "をテーマに一句お願いします！",
+    "（当日17:00締切）",
   ]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -34,8 +34,11 @@ export default function Page() {
       setTalkId(Number(storedTalkId));
       setMessage([
         "投句ありがとうございます！",
-        "当選発表をお待ちください！",
-        "（17時台後半LTにて）",
+        "",
+        "AI(?)審査による入選作発表があります！",
+        "（17時台後半のLT内で発表予定）",
+        "",
+        "X（旧Twitter）へのポストもぜひ！",
       ]);
     }
 

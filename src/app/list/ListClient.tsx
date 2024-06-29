@@ -91,7 +91,7 @@ export default function ListClient({
                 disabled={talkOn}
                 className="bg-orange-500 hover:bg-orange-300 text-xs-responsive text-white hover:text-black"
               >
-                {winFin ? "再抽選" : "抽選"}
+                {winFin ? "再審査" : "AI審査"}
               </Button>
             </div>
             <Tabs
@@ -109,7 +109,7 @@ export default function ListClient({
                   渡済
                 </TabsTrigger>
                 <TabsTrigger value="winning" className="text-xs-responsive">
-                  当選
+                  入選
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="all">

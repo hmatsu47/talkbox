@@ -54,7 +54,7 @@ const DisplayComponent: React.FC<DisplayComponentProps> = ({
               onClick={handleCheckWinning}
               className="bg-orange-500 hover:bg-orange-300 text-xs-responsive text-white hover:text-black"
             >
-              当選結果を確認
+              審査結果を確認
             </Button>
           </TableCell>
         </TableRow>
