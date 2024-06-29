@@ -59,8 +59,10 @@ export function HaikuTable({
               <div className="flex items-center justify-end">
                 <Button
                   onClick={() => handleToggle(haiku.talk_id)}
-                  className={`text-white hover:bg-orange-300 text-xs-responsive mr-2 ${
-                    haiku.hand_over === 1 ? "bg-orange-300" : "bg-orange-500"
+                  className={`text-xs-responsive mr-2 ${
+                    haiku.hand_over === 1
+                      ? "bg-orange-300 hover:bg-orange-500 text-black hover:text-white"
+                      : "bg-orange-500 hover:bg-orange-300 text-white hover:text-black"
                   }`}
                 >
                   {haiku.hand_over === 0 ? "未" : "済"}

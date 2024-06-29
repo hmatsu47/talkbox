@@ -17,6 +17,12 @@ const DisplayComponent: React.FC<DisplayComponentProps> = ({
   talkId,
   handleCheckWinning,
 }) => {
+  const handlePostToX = () => {
+    const text = `大吉祥寺.pm #ミニ句会 で投句しました！\n${haiku}\n（詠み人：${haijinName}／投句番号：${talkId}）\n#kichijojipm`;
+    const url = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <Table className="w-full text-left border-collapse text-xs-responsive">
       <TableBody>
@@ -35,8 +41,18 @@ const DisplayComponent: React.FC<DisplayComponentProps> = ({
         <TableRow>
           <TableCell colSpan={2} className="p-2 text-center">
             <Button
+              onClick={handlePostToX}
+              className="bg-black hover:bg-gray-500 text-xs-responsive text-white"
+            >
+              X（旧Twitter）にポスト
+            </Button>
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell colSpan={2} className="p-2 text-center">
+            <Button
               onClick={handleCheckWinning}
-              className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
+              className="bg-orange-500 hover:bg-orange-300 text-xs-responsive text-white hover:text-black"
             >
               当選結果を確認
             </Button>

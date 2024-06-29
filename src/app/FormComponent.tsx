@@ -145,7 +145,7 @@ const FormComponent: React.FC<FormComponentProps> = ({
               <Button
                 type="submit"
                 disabled={isPending}
-                className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
+                className="bg-orange-500 hover:bg-orange-300 text-xs-responsive text-white hover:text-black"
               >
                 投句
               </Button>

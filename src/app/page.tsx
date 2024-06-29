@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useTransition, Suspense } from "react";
-import { useRouter } from "next/navigation";
 import { addHaiku, checkWinning } from "../lib/actions";
 import FormComponent from "./FormComponent";
 import DisplayComponent from "./DisplayComponent";
@@ -36,7 +35,7 @@ export default function Page() {
       setMessage([
         "投句ありがとうございます！",
         "当選発表をお待ちください！",
-        "（17時台後半）",
+        "（17時台後半LTにて）",
       ]);
     }
 
@@ -83,10 +82,10 @@ export default function Page() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 min-w-[360px]">
+    <div className="mx-auto p-4 min-w-[360px] max-w-[480px]">
       <Card>
         <CardHeader className="text-center text-2xl font-bold text-gray-800 text-xs-responsive">
-          投句箱
+          ミニ句会 投句箱🗳️
         </CardHeader>
         <CardContent>
           <Suspense fallback={<LoadingSpinner />}>

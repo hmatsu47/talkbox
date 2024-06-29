@@ -53,7 +53,7 @@ export default function ListClient({
       } else if (filter === "handed") {
         return haiku.hand_over > 0;
       } else if (filter === "winning") {
-        return haiku.winning && haiku.winning.startsWith("当選");
+        return haiku.winning;
       }
       return true; // 'all' or any other value
     });
@@ -82,14 +82,14 @@ export default function ListClient({
             <div className="flex justify-start mb-4 space-x-2">
               <Button
                 onClick={handleToggleTalkOn}
-                className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
+                className="bg-orange-500 hover:bg-orange-300 text-xs-responsive text-white hover:text-black"
               >
                 {talkOn ? "投句終了" : "投句再開"}
               </Button>
               <Button
                 onClick={handlePerformDraw}
                 disabled={talkOn}
-                className="bg-orange-500 text-white hover:bg-orange-300 text-xs-responsive"
+                className="bg-orange-500 hover:bg-orange-300 text-xs-responsive text-white hover:text-black"
               >
                 {winFin ? "再抽選" : "抽選"}
               </Button>

@@ -116,7 +116,7 @@ export async function addHaiku(
         result: [
           "投句ありがとうございます！",
           "当選発表をお待ちください！",
-          "（17時台後半）",
+          "（17時台後半LTにて）",
         ],
         token: result.rows[0].token,
       };
@@ -126,9 +126,9 @@ export async function addHaiku(
         result: [
           "投句ありがとうございます！",
           `先着${goodsCount}名様にプレゼントがあります！`,
-          "休憩時間中お早めに受付まで",
+          "休憩時間中お早めに受付まで！",
           "※この画面を見せてください",
-          "（17:00締切／別途抽選あり）",
+          "（17:00締切／LTで別途抽選あり）",
         ],
         token: result.rows[0].token,
       };
@@ -162,7 +162,7 @@ export async function checkWinning(
     return [
       "まだ抽選が行われていません",
       "当選発表をお待ちください！",
-      "（17時台後半）",
+      "（17時台後半LTにて）",
     ];
   }
 
