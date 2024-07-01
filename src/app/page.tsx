@@ -18,7 +18,7 @@ export default function Page() {
     haijin_name?: string;
   }>({});
   const [message, setMessage] = useState<string[]>([
-    "「ITコミュニティのこれまでと、これから」",
+    "「コミュニケーションのこれまでと、これから」",
     "をテーマに一句お願いします！",
     "（当日17:00締切）",
   ]);
