@@ -42,15 +42,37 @@ async function getEmbedding(text: string): Promise<number[] | null> {
   }
 }
 
-async function getLatestSetting() {
-  const client = await pool.connect();
-  const result = await client.query(
-    "SELECT talk_on, win_fin FROM setting ORDER BY setting_id DESC LIMIT 1"
-  );
-  client.release();
-  return result.rows[0];
+export async function getLatestSetting() {
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      "SELECT talk_on, win_fin FROM setting ORDER BY setting_id DESC LIMIT 1"
+    );
+    client.release();
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error fetching setting:", error);
+    const result = {
+      talk_on: true,
+      win_fin: false,
+    };
+    return result;
+  }
 }
 
+export async function getListHaikus() {
+  try {
+    const client = await pool.connect();
+    const result = await client.query(
+      "SELECT talk_id, haijin_name, haiku, hand_over, winning FROM talk_box ORDER BY talk_id ASC"
+    );
+    client.release();
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching talk_box:", error);
+    return [];
+  }
+}
 export async function addHaiku(
   formData: FormData
 ): Promise<{ talk_id: number | null; result: string[]; token: string | null }> {
