@@ -35,7 +35,6 @@ async function getEmbedding(text: string): Promise<number[] | null> {
     const response = await client.send(command);
     const responseBody = await response.body.transformToString();
     const embedding = JSON.parse(responseBody).embeddings[0];
-    console.log(embedding);
     return embedding;
   } catch (error) {
     console.error("Error fetching embedding:", error);
