@@ -20,21 +20,22 @@ const pool = new Pool({
 });
 
 async function getEmbedding(text: string): Promise<number[] | null> {
-  const client = new BedrockRuntimeClient({ region: "us-west-2" });
+  const client = new BedrockRuntimeClient({ region: "ap-northeast-1" });
   const command = new InvokeModelCommand({
-    modelId: "amazon.titan-embed-text-v2:0",
+    modelId: "cohere.embed-multilingual-v3",
     body: JSON.stringify({
-      inputText: text,
-      dimensions: 1024,
-      normalize: true,
+      texts: [text],
+      input_type: "search_document",
     }),
+    accept: "*/*",
     contentType: "application/json",
   });
 
   try {
     const response = await client.send(command);
     const responseBody = await response.body.transformToString();
-    const embedding = JSON.parse(responseBody).embedding;
+    const embedding = JSON.parse(responseBody).embeddings[0];
+    console.log(embedding);
     return embedding;
   } catch (error) {
     console.error("Error fetching embedding:", error);
