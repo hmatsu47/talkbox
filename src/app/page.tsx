@@ -18,7 +18,7 @@ export default function Page() {
     haijin_name?: string;
   }>({});
   const [message, setMessage] = useState<string[]>([
-    "「コミュニケーションのこれまでと、これから」",
+    "「コミュニケーションのいままでと、これから」",
     "をテーマに一句お願いします！",
     "（当日17:00締切）",
   ]);
@@ -89,6 +89,12 @@ export default function Page() {
       <Card>
         <CardHeader className="text-center text-2xl font-bold text-gray-800 text-xs-responsive">
           ミニ句会 投句箱🗳️
+          <a
+            href="https://hmatsu47.hatenablog.com/dai_kichijojipm_2024"
+            className="text-xl text-orange-800"
+          >
+            [説明はこちら]
+          </a>
         </CardHeader>
         <CardContent>
           <Suspense fallback={<LoadingSpinner />}>

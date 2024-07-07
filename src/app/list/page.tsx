@@ -1,12 +1,11 @@
 import { Card, CardHeader, CardContent } from "../../components/ui/card";
-import { getListHaikus, getLatestSetting } from "../../lib/actions";
+import { getListHaikus } from "../../lib/actions";
 import ListClient from "./ListClient";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { Suspense } from "react";
 
 export default async function ListPage() {
   const haikus = await getListHaikus();
-  const setting = await getLatestSetting();
   const isAdminToken = process.env.IS_ADMIN_TOKEN ?? "";
 
   return (
@@ -17,11 +16,7 @@ export default async function ListPage() {
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Suspense fallback={<LoadingSpinner />}>
-            <ListClient
-              haikus={haikus}
-              setting={setting}
-              isAdminToken={isAdminToken}
-            />
+            <ListClient isAdminToken={isAdminToken} />
           </Suspense>
         </CardContent>
       </Card>

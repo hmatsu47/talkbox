@@ -11,7 +11,13 @@ import {
 import { HaikuTable } from "./HaikuTable";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { Button } from "../../components/ui/button";
-import { toggleTalkOn, performDraw } from "../../lib/actions";
+import {
+  toggleTalkOn,
+  performDraw,
+  handleRevalidatePath,
+  getListHaikus,
+  getLatestSetting,
+} from "../../lib/actions";
 
 interface Haiku {
   talk_id: number;
@@ -21,18 +27,11 @@ interface Haiku {
   winning: string | null;
 }
 
-export default function ListClient({
-  haikus,
-  setting,
-  isAdminToken,
-}: {
-  haikus: Haiku[];
-  setting: { talk_on: boolean; win_fin: boolean };
-  isAdminToken: string;
-}) {
+export default function ListClient({ isAdminToken }: { isAdminToken: string }) {
   const [filter, setFilter] = useState<string>("all");
-  const [talkOn, setTalkOn] = useState<boolean>(setting.talk_on);
-  const [winFin, setWinFin] = useState<boolean>(setting.win_fin);
+  const [talkOn, setTalkOn] = useState<boolean>(true);
+  const [winFin, setWinFin] = useState<boolean>(false);
+  const [haikus, setHaikus] = useState<Haiku[]>([]);
   const [filteredHaikus, setFilteredHaikus] = useState<Haiku[]>(haikus);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
@@ -43,16 +42,18 @@ export default function ListClient({
       router.push("/");
     } else {
       setIsLoading(false);
+      loadInitialHaikusAndSetting();
     }
   }, [isAdminToken, router]);
 
   useEffect(() => {
     const filtered = haikus.filter((haiku) => {
-      if (filter === "unhanded") {
-        return haiku.hand_over === 0;
-      } else if (filter === "handed") {
-        return haiku.hand_over > 0;
-      } else if (filter === "winning") {
+      // if (filter === "unhanded") {
+      //   return haiku.hand_over === 0;
+      // } else if (filter === "handed") {
+      //   return haiku.hand_over > 0;
+      // } else if (filter === "winning") {
+      if (filter === "winning") {
         return haiku.winning;
       }
       return true; // 'all' or any other value
@@ -60,16 +61,27 @@ export default function ListClient({
     setFilteredHaikus(filtered);
   }, [filter, haikus]);
 
+  const loadInitialHaikusAndSetting = async () => {
+    const initialHaikus = await getListHaikus();
+    const initialSetting = await getLatestSetting();
+    setHaikus(initialHaikus);
+    setFilteredHaikus(initialHaikus);
+    setTalkOn(initialSetting.talk_on);
+    setWinFin(initialSetting.win_fin);
+  };
+
   const handleToggleTalkOn = async () => {
     const newTalkOn = await toggleTalkOn();
     setTalkOn(newTalkOn);
+    handleRevalidatePath("list");
   };
 
   const handlePerformDraw = async () => {
     const message = await performDraw();
     alert(message);
     setWinFin(true);
-    router.refresh(); // キャッシュフラッシュ
+    handleRevalidatePath("list");
+    // router.refresh(); // キャッシュフラッシュ
   };
 
   return (
@@ -102,12 +114,12 @@ export default function ListClient({
                 <TabsTrigger value="all" className="text-xs-responsive">
                   全て
                 </TabsTrigger>
-                <TabsTrigger value="unhanded" className="text-xs-responsive">
+                {/* <TabsTrigger value="unhanded" className="text-xs-responsive">
                   未渡
                 </TabsTrigger>
                 <TabsTrigger value="handed" className="text-xs-responsive">
                   渡済
-                </TabsTrigger>
+                </TabsTrigger> */}
                 <TabsTrigger value="winning" className="text-xs-responsive">
                   入選
                 </TabsTrigger>
@@ -119,7 +131,7 @@ export default function ListClient({
                   router={router}
                 />
               </TabsContent>
-              <TabsContent value="unhanded">
+              {/* <TabsContent value="unhanded">
                 <HaikuTable
                   haikus={filteredHaikus}
                   setHaikus={setFilteredHaikus}
@@ -132,7 +144,7 @@ export default function ListClient({
                   setHaikus={setFilteredHaikus}
                   router={router}
                 />
-              </TabsContent>
+              </TabsContent> */}
               <TabsContent value="winning">
                 <HaikuTable
                   haikus={filteredHaikus}

@@ -8,6 +8,8 @@ import {
   InvokeModelCommand,
 } from "@aws-sdk/client-bedrock-runtime";
 import pgvector from "pgvector/pg";
+import { cache } from "react";
+import { revalidatePath } from "next/cache";
 
 dotenv.config();
 
@@ -42,7 +44,7 @@ async function getEmbedding(text: string): Promise<number[] | null> {
   }
 }
 
-export async function getLatestSetting() {
+export const getLatestSetting = cache(async () => {
   try {
     const client = await pool.connect();
     const result = await client.query(
@@ -58,9 +60,9 @@ export async function getLatestSetting() {
     };
     return result;
   }
-}
+});
 
-export async function getListHaikus() {
+export const getListHaikus = cache(async () => {
   try {
     const client = await pool.connect();
     const result = await client.query(
@@ -72,7 +74,8 @@ export async function getListHaikus() {
     console.error("Error fetching talk_box:", error);
     return [];
   }
-}
+});
+
 export async function addHaiku(
   formData: FormData
 ): Promise<{ talk_id: number | null; result: string[]; token: string | null }> {
@@ -225,7 +228,7 @@ export async function checkWinning(
   }
 }
 
-export async function toggleTalkOn() {
+export const toggleTalkOn = cache(async () => {
   const latestSetting = await getLatestSetting();
   const newTalkOn = !latestSetting.talk_on;
 
@@ -237,9 +240,9 @@ export async function toggleTalkOn() {
   client.release();
 
   return newTalkOn;
-}
+});
 
-export async function performDraw() {
+export const performDraw = cache(async () => {
   const latestSetting = await getLatestSetting();
   if (latestSetting.talk_on === true) {
     return "審査は投句終了後に行ってください。";
@@ -277,19 +280,25 @@ export async function performDraw() {
     console.error("Error performing draw:", error);
     return "エラーが発生しました。再試行してください。";
   }
-}
+});
 
-export async function toggleHandOver(talkId: number): Promise<number | null> {
-  try {
-    const client = await pool.connect();
-    const result = await client.query(
-      "UPDATE talk_box SET hand_over = CASE WHEN hand_over = 0 THEN 1 ELSE 0 END WHERE talk_id = $1 RETURNING hand_over",
-      [talkId]
-    );
-    client.release();
-    return result.rows[0].hand_over;
-  } catch (error) {
-    console.error("Error toggling hand_over status:", error);
-    return null;
+export const toggleHandOver = cache(
+  async (talkId: number): Promise<number | null> => {
+    try {
+      const client = await pool.connect();
+      const result = await client.query(
+        "UPDATE talk_box SET hand_over = CASE WHEN hand_over = 0 THEN 1 ELSE 0 END WHERE talk_id = $1 RETURNING hand_over",
+        [talkId]
+      );
+      client.release();
+      return result.rows[0].hand_over;
+    } catch (error) {
+      console.error("Error toggling hand_over status:", error);
+      return null;
+    }
   }
+);
+
+export async function handleRevalidatePath(path: string) {
+  revalidatePath(path);
 }

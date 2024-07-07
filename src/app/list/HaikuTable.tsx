@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "../../components/ui/button";
-import { toggleHandOver } from "../../lib/actions";
+import { handleRevalidatePath, toggleHandOver } from "../../lib/actions";
 import { useRouter } from "next/navigation";
 
 interface Haiku {
@@ -29,6 +29,7 @@ export function HaikuTable({
           haiku.talk_id === talkId ? { ...haiku, hand_over: updated } : haiku
         )
       );
+      handleRevalidatePath("list");
       router.refresh();
     }
   };
@@ -60,9 +61,9 @@ export function HaikuTable({
                 <Button
                   onClick={() => handleToggle(haiku.talk_id)}
                   className={`text-xs-responsive mr-2 ${
-                    haiku.hand_over === 1
-                      ? "bg-orange-300 hover:bg-orange-500 text-black hover:text-white"
-                      : "bg-orange-500 hover:bg-orange-300 text-white hover:text-black"
+                    haiku.hand_over === 0
+                      ? "bg-orange-500 hover:bg-orange-300 text-white hover:text-black"
+                      : "bg-orange-300 hover:bg-orange-500 text-black hover:text-white"
                   }`}
                 >
                   {haiku.hand_over === 0 ? "未" : "済"}
