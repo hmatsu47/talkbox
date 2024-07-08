@@ -38,6 +38,7 @@ export default function ListClient({ isAdminToken }: { isAdminToken: string }) {
 
   useEffect(() => {
     const storedIsAdminToken = localStorage.getItem("isAdminToken");
+    console.log(`ENV:${isAdminToken} / STOR:${storedIsAdminToken}`);
     if (storedIsAdminToken !== isAdminToken) {
       router.push("/");
     } else {
