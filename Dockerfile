@@ -1,6 +1,6 @@
 FROM public.ecr.aws/lambda/nodejs:20 AS builder
 
-WORKDIR /app
+WORKDIR /build
 COPY package.json ./
 COPY package-lock.json ./
 RUN npm install
