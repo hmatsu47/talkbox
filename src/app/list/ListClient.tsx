@@ -45,7 +45,7 @@ export default function ListClient({ isAdminToken }: { isAdminToken: string }) {
       setIsLoading(false);
       loadInitialHaikusAndSetting();
     }
-  }, [isAdminToken]);
+  }, [isAdminToken, router]);
 
   useEffect(() => {
     const filtered = haikus.filter((haiku) => {
