@@ -1,11 +1,9 @@
 import { Card, CardHeader, CardContent } from "../../components/ui/card";
-import { getListHaikus } from "../../lib/actions";
 import ListClient from "./ListClient";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { Suspense } from "react";
 
-export default async function ListPage() {
-  const haikus = await getListHaikus();
+export default function ListPage() {
   const isAdminToken = process.env.IS_ADMIN_TOKEN ?? "";
 
   return (
