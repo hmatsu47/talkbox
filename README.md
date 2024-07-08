@@ -6,7 +6,7 @@
 
 ```sh:
 docker pull pgvector/pgvector:pg16
-docker run --net=host -e POSTGRES_PASSWORD='xxxxxxxx' pgvector/pgvector
+docker run --net=host -e POSTGRES_PASSWORD='xxxxxxxx' pgvector/pgvector:pg16
 ```
 
 ※ for macOS
