@@ -20,7 +20,7 @@ export default function Page() {
   const [message, setMessage] = useState<string[]>([
     "「コミュニケーションのいままでと、これから」",
     "をテーマに一句お願いします！",
-    "（当日17:00締切）",
+    "（7/13(Sat) 17:00締切）",
   ]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,7 +36,7 @@ export default function Page() {
         "投句ありがとうございます！",
         "",
         "AI(?)審査による入選作発表があります！",
-        "（17時台後半のLT内で発表予定）",
+        "（当日17時台後半のLT内で発表予定）",
         "",
         "X（旧Twitter）へのポストもぜひ！",
       ]);

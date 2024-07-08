@@ -18,7 +18,7 @@ const DisplayComponent: React.FC<DisplayComponentProps> = ({
   handleCheckWinning,
 }) => {
   const handlePostToX = () => {
-    const text = `大吉祥寺.pm #ミニ句会 で投句しました！\n${haiku}\n（詠み人：${haijinName}／投句番号：${talkId}）\n#kichijojipm`;
+    const text = `大吉祥寺.pm #ミニ句会 で投句しました！\n${haiku}\n（詠み人：${haijinName}／投句番号：${talkId}）\n#kichijojipm \nhttps://kichijojipm.hmatsu47.com/`;
     const url = `https://x.com/intent/post?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   };

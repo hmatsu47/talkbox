@@ -2,7 +2,6 @@
 
 import { Button } from "../../components/ui/button";
 import { handleRevalidatePath, toggleHandOver } from "../../lib/actions";
-import { useRouter } from "next/navigation";
 
 interface Haiku {
   talk_id: number;
@@ -13,13 +12,15 @@ interface Haiku {
 }
 
 export function HaikuTable({
-  haikus,
+  filteredHaikus,
   setHaikus,
-  router,
+  setFilteredHaikus,
+  filter,
 }: {
-  haikus: Haiku[];
+  filteredHaikus: Haiku[];
   setHaikus: React.Dispatch<React.SetStateAction<Haiku[]>>;
-  router: ReturnType<typeof useRouter>;
+  setFilteredHaikus: React.Dispatch<React.SetStateAction<Haiku[]>>;
+  filter: string;
 }) {
   const handleToggle = async (talkId: number) => {
     const updated = await toggleHandOver(talkId);
@@ -29,12 +30,16 @@ export function HaikuTable({
           haiku.talk_id === talkId ? { ...haiku, hand_over: updated } : haiku
         )
       );
+      setFilteredHaikus((prevHaikus) =>
+        prevHaikus.map((haiku) =>
+          haiku.talk_id === talkId ? { ...haiku, hand_over: updated } : haiku
+        )
+      );
       handleRevalidatePath("list");
-      router.refresh();
     }
   };
 
-  if (haikus.length === 0) {
+  if (filteredHaikus.length === 0) {
     return (
       <p className="text-center text-gray-600 text-xs-responsive">
         該当する投句はありません。
@@ -51,23 +56,27 @@ export function HaikuTable({
         </tr>
       </thead>
       <tbody>
-        {haikus.map((haiku, index) => (
+        {filteredHaikus.map((haiku, index) => (
           <tr
             key={haiku.talk_id}
             className={index % 2 === 0 ? "bg-gray-100" : "bg-white"}
           >
             <td className="py-2 px-4 border-b text-right">
               <div className="flex items-center justify-end">
-                <Button
-                  onClick={() => handleToggle(haiku.talk_id)}
-                  className={`text-xs-responsive mr-2 ${
-                    haiku.hand_over === 0
-                      ? "bg-orange-500 hover:bg-orange-300 text-white hover:text-black"
-                      : "bg-orange-300 hover:bg-orange-500 text-black hover:text-white"
-                  }`}
-                >
-                  {haiku.hand_over === 0 ? "未" : "済"}
-                </Button>
+                {filter === "winning" ? (
+                  ""
+                ) : (
+                  <Button
+                    onClick={() => handleToggle(haiku.talk_id)}
+                    className={`text-xs-responsive mr-2 ${
+                      haiku.hand_over === 0
+                        ? "bg-orange-500 hover:bg-orange-300 text-white hover:text-black"
+                        : "bg-orange-300 hover:bg-orange-500 text-black hover:text-white"
+                    }`}
+                  >
+                    {haiku.hand_over === 0 ? "未" : "済"}
+                  </Button>
+                )}
                 <span>{haiku.talk_id}</span>
               </div>
             </td>
