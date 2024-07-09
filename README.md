@@ -24,3 +24,14 @@ ALTER TABLE talk_box ADD CONSTRAINT unique_haiku UNIQUE (haiku);
 CREATE TABLE IF NOT EXISTS setting (setting_id SERIAL PRIMARY KEY, talk_on BOOLEAN NOT NULL, win_fin BOOLEAN NOT NULL);
 INSERT INTO setting (talk_on, win_fin) VALUES (true, false);
 ```
+
+## `.env.development.local`・`.env.production.local`
+
+```txt:
+BASE_ANSWER="【審査の基準となる文章（500文字程度）＝ベクトル検索でこれに「近い」と判定された句ほど上位にランクインする】"
+DATABASE_HOST=【DBホストのアドレス】
+DATABASE_PORT=【DBのポート番号】
+DATABASE_USER=【DBの接続ユーザー名】
+DATABASE_PASSWORD="【DBのパスワード】"
+IS_ADMIN_TOKEN="【一覧画面が見れるユーザーのトークン文字列】"
+```
