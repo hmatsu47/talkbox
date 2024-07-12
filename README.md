@@ -1,6 +1,6 @@
 # talkbox
 
-なにかの Next.js
+なにかの Next.js　（App Router）
 
 ## PstgreSQL 16 with pgvector 0.7.x or later
 
