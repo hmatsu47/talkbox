@@ -2,6 +2,8 @@
 
 なにかの Next.js　（App Router）
 
+→ 2024/7/13 大吉祥寺.pm LT でのミニ句会投句箱
+
 ## PstgreSQL 16 with pgvector 0.7.x or later
 
 ```sh:
